@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Keyboard } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { BookContext } from '../context/BookContext';
 
 const TRENDING_KEYWORDS = [
   'Romantic Story',
@@ -19,6 +21,7 @@ const SearcchScreen = ({ navigation }) => {
   const [trending, setTrending] = useState(TRENDING_KEYWORDS);
   const [showTrending, setShowTrending] = useState(true);
   const [error, setError] = useState(null);
+  const { searchBooks, loading, randomBook } = useContext(BookContext);
 
   const handleSearch = async (searchText) => {
     if (!searchText) return;
@@ -43,16 +46,15 @@ const SearcchScreen = ({ navigation }) => {
   };
 
   const onBookPress = (item) => {
-    const bookData = {
-      title: item.title,
-      author: item.author_name ? item.author_name.join(', ') : 'Unknown Author',
-      cover: item.cover_i ? `https://covers.openlibrary.org/b/id/${item.cover_i}-L.jpg` : null,
-      description: 'No description available.',
-      details: 'No additional details available.',
-      rating: 0,
-      review: 'No reviews available.'
-    };
-    navigation.navigate('BookInfo', { book: bookData });
+    const workKey = item.key.startsWith('/works/') ? item.key : `/works/${item.key}`;
+    navigation.navigate('BookInfo', { workKey });
+  };
+
+  const handleRandomBook = async () => {
+    const book = await randomBook();
+    if (book) {
+      navigation.navigate('BookInfo', { workKey: book.key });
+    }
   };
 
   const renderTrending = () => (
@@ -68,7 +70,7 @@ const SearcchScreen = ({ navigation }) => {
   );
 
   const renderResultItem = ({ item }) => (
-    <TouchableOpacity style={styles.resultItem} onPress={() => navigation.navigate('BookInfo', { workKey: item.key })}>
+    <TouchableOpacity style={styles.resultItem} onPress={() => onBookPress(item)}>
       <Ionicons name="book-outline" size={20} color="#7a6f6f" style={{marginRight: 10}} />
       <View>
         <Text style={styles.resultTitle}>{item.title}</Text>
@@ -78,27 +80,30 @@ const SearcchScreen = ({ navigation }) => {
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Search</Text>
-      <View style={styles.searchBarContainer}>
-        <Ionicons name="search-outline" size={20} color="#bdb5b5" style={{marginLeft: 10}} />
-        <TextInput
-          style={styles.searchBar}
-          placeholder="Search For Books"
-          value={query}
-          onChangeText={text => {
-            setQuery(text);
-            if (text.length === 0) {
-              setShowTrending(true);
-              setResults([]);
-            }
-          }}
-          onSubmitEditing={() => handleSearch(query)}
-          returnKeyType="search"
-          clearButtonMode="while-editing"
-        />
+    <SafeAreaView style={styles.container}>
+      <View style={styles.searchContainer}>
+        <View style={styles.searchBox}>
+          <Ionicons name="search" size={24} color="#7a6f6f" style={styles.searchIcon} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Kitap ara..."
+            value={query}
+            onChangeText={setQuery}
+            onSubmitEditing={() => handleSearch(query)}
+            returnKeyType="search"
+          />
+          {query ? (
+            <TouchableOpacity onPress={() => setQuery('')}>
+              <Ionicons name="close-circle" size={24} color="#7a6f6f" />
+            </TouchableOpacity>
+          ) : null}
+        </View>
       </View>
-      {searching && <ActivityIndicator style={{marginTop: 20}} color="#7a6f6f" />}
+
+      {loading ? (
+        <ActivityIndicator size="large" color="#4B3B3B" style={styles.loader} />
+      ) : null}
+
       {error && <Text style={styles.error}>{error}</Text>}
       {showTrending && renderTrending()}
       {!showTrending && !searching && (
@@ -110,41 +115,75 @@ const SearcchScreen = ({ navigation }) => {
           contentContainerStyle={{paddingBottom: 40}}
         />
       )}
-    </View>
+
+      <View style={styles.bottomContainer}>
+        <TouchableOpacity style={styles.randomButton} onPress={handleRandomBook}>
+          <Ionicons name="shuffle" size={24} color="#fff" />
+          <Text style={styles.randomButtonText}>Bana Bir Kitap Öner</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#e3d7d7',
-    paddingHorizontal: 20,
-    paddingTop: 40,
+    backgroundColor: '#fff',
   },
-  header: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 18,
-    color: '#3d3535'
+  searchContainer: {
+    padding: 16,
+    backgroundColor: '#f3eded',
   },
-  searchBarContainer: {
+  searchBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f3eded',
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    marginBottom: 16,
-    paddingVertical: 8,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    marginBottom: 12,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: 3,
     elevation: 3,
   },
-  searchBar: {
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
     flex: 1,
+    height: 48,
     fontSize: 16,
-    color: '#3d3535',
+    color: '#4B3B3B',
+  },
+  randomButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#4B3B3B',
+    borderRadius: 12,
+    padding: 12,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  randomButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+  loader: {
+    marginTop: 20,
   },
   resultItem: {
     flexDirection: 'row',
@@ -192,6 +231,16 @@ const styles = StyleSheet.create({
     color: '#7a6f6f',
     textAlign: 'center',
     marginTop: 20,
+  },
+  bottomContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 16,
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#f3eded',
   },
 });
 
