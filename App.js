@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -58,6 +58,9 @@ export default function App() {
       <BookProvider>
         <FavoritesProvider>
           <NavigationContainer>
+            <View style={styles.header}>
+              <Text style={styles.headerText}>BooksWorld</Text>
+            </View>
             <Tab.Navigator
               screenOptions={({ route }) => ({
                 tabBarIcon: ({ focused, color, size }) => {
@@ -74,8 +77,18 @@ export default function App() {
                 tabBarActiveTintColor: '#4B3B3B',
                 tabBarInactiveTintColor: '#7a6f6f',
                 headerShown: false,
-                tabBarStyle: { backgroundColor: '#f3eded', borderTopLeftRadius: 20, borderTopRightRadius: 20, height: 65 },
-                tabBarLabelStyle: { fontSize: 13, marginBottom: 8 },
+                tabBarStyle: {
+                  backgroundColor: '#f3eded',
+                  borderTopLeftRadius: 20,
+                  borderTopRightRadius: 20,
+                  height: 75,
+                  paddingBottom: 10,
+                  paddingTop: 10,
+                },
+                tabBarLabelStyle: {
+                  fontSize: 12,
+                  marginBottom: 3,
+                },
               })}
             >
               <Tab.Screen name="Home" component={HomeStack} />
@@ -96,5 +109,26 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  header: {
+    backgroundColor: '#f3eded',
+    padding: 20,
+    marginTop: 40,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  headerText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#4B3B3B',
+    marginLeft: 10,
   },
 });
