@@ -6,7 +6,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import SearcchScreen from './screen/SearcchScreen';
-import BookInfo from './screen/BookInfo';
+import BookInfoScreen from './components/pages/BookInfoScreen';
 import HomeScreen from './screen/HomeScreen';
 import FavoritesScreen from './screen/FavoritesScreen';
 import CategoryBooksScreen from './screen/CategoryBooksScreen';
@@ -21,7 +21,7 @@ function HomeStack() {
     <Stack.Navigator>
       <Stack.Screen name="HomeMain" component={HomeScreen} options={{ headerShown: false }} />
       <Stack.Screen name="CategoryBooks" component={CategoryBooksScreen} options={{ headerShown: false }} />
-      <Stack.Screen name="BookInfo" component={BookInfo} options={{ headerShown: false }} />
+      <Stack.Screen name="BookInfo" component={BookInfoScreen} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }
@@ -36,7 +36,7 @@ function SearchStack() {
       />
       <Stack.Screen 
         name="BookInfo" 
-        component={BookInfo}
+        component={BookInfoScreen}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>
@@ -47,7 +47,7 @@ function FavoritesStack() {
   return (
     <Stack.Navigator>
       <Stack.Screen name="FavoritesMain" component={FavoritesScreen} options={{ headerShown: false }} />
-      <Stack.Screen name="BookInfo" component={BookInfo} options={{ headerShown: false }} />
+      <Stack.Screen name="BookInfo" component={BookInfoScreen} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }
